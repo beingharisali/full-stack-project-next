@@ -19,15 +19,20 @@ function page() {
   }
   async function submitHandler(e) {
     e.preventDefault();
-    const data = await axios.patch(`http://localhost:5000/tasks/${params.id}`, {
-      taskToBeDone,
-    });
+    const data = await axios.patch(
+      `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/tasks/${params.id}`,
+      {
+        taskToBeDone,
+      }
+    );
     console.log(data);
     router.push("/");
   }
   useEffect(() => {
     async function fetchSingleTask() {
-      const data = await axios.get(`http://localhost:5000/tasks/${params.id}`);
+      const data = await axios.get(
+        `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/tasks/${params.id}`
+      );
       console.log(data.data.task);
       setTaskToBeDone(data.data.task.taskToBeDone);
     }

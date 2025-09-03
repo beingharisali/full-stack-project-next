@@ -11,7 +11,9 @@ export default function Home() {
 
   async function fetchData() {
     try {
-      const data = await axios.get("http://localhost:5000/tasks");
+      const data = await axios.get(
+        `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/tasks`
+      );
       if (data.statusText !== "OK") {
         throw new Error("Data not fetched");
       }
@@ -40,9 +42,12 @@ export default function Home() {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://localhost:5000/create", {
-        taskToBeDone,
-      });
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/create`,
+        {
+          taskToBeDone,
+        }
+      );
       console.log("res", res);
       if (res.statusText !== "OK") {
         throw new Error("Data not sent");
@@ -63,7 +68,9 @@ export default function Home() {
 
   async function handleDelete(id) {
     try {
-      const res = await axios.delete(`http://localhost:5000/tasks/${id}`);
+      const res = await axios.delete(
+        `${process.env.NEXT_PUBLIC_APP_BACKEND_URL}/tasks/${id}`
+      );
       console.log(res);
       fetchData();
     } catch {
