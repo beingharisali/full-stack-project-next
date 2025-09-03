@@ -1,21 +1,22 @@
 "use client";
-
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
   const [todos, setTodos] = useState([]);
-  const [editId, setEditId] = useState(null);
-  const [input, setInput] = useState({ todo: "" });
+  const [taskToBeDone, setTaskToBeDone] = useState("");
+
+  const router = useRouter();
 
   async function fetchData() {
     try {
-      const data = await axios.get("backend api");
+      const data = await axios.get("http://localhost:5000/tasks");
       if (data.statusText !== "OK") {
         throw new Error("Data not fetched");
       }
-      setTodos(data.data);
-      console.log(data);
+      setTodos(data.data.tasks);
+      console.log("data", data.data.tasks);
     } catch {
       (err) => console.log(err);
     }
@@ -26,35 +27,30 @@ export default function Home() {
   }, []);
 
   function handleChange(e) {
-    const { name, value } = e.target;
-    setInput({
-      ...input,
-      [name]: value,
-    });
+    // const { name, value } = e.target;
+    // setTaskToBeDone({
+    //   ...taskToBeDone,
+    //   [name]: value,
+    // });
+    setTaskToBeDone(e.target.value);
+    console.log(e.target.value);
   }
 
-  async function handleSubmitEdit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     try {
-      if (editId) {
-        const res = await axios.post(`backend api/${editId}`, input);
-        if (res.statusText !== "OK") {
-          throw new Error("Data not sent");
-        }
-        console.log(res);
-      } else {
-        const res = await axios.post("backend api", input);
-        if (res.statusText !== "OK") {
-          throw new Error("Data not sent");
-        }
-        console.log(res);
+      const res = await axios.post("http://localhost:5000/create", {
+        taskToBeDone,
+      });
+      console.log("res", res);
+      if (res.statusText !== "OK") {
+        throw new Error("Data not sent");
       }
     } catch {
       (err) => console.log(err);
     } finally {
-      setInput({ todo: "" });
-      setEditId(null);
+      setTaskToBeDone("");
       fetchData();
     }
 
@@ -67,7 +63,7 @@ export default function Home() {
 
   async function handleDelete(id) {
     try {
-      const res = await axios.delete(`backend api /${id}`);
+      const res = await axios.delete(`http://localhost:5000/tasks/${id}`);
       console.log(res);
       fetchData();
     } catch {
@@ -75,23 +71,18 @@ export default function Home() {
     }
   }
 
-  async function handleEdit(val) {
-    setInput({ todo: val.todo });
-    setEditId(val._id);
-  }
-
   return (
     <div className="font-sans min-h-screen bg-black text-white flex items-center justify-center p-6 ">
       <main className="w-full max-w-lg h-[600px] flex flex-col bg-black border border-gray-800 rounded-lg ">
         <div className="p-4 border-b border-gray-800">
           <h1 className="text-2xl font-bold mb-3">To-Do List</h1>
-          <form onSubmit={handleSubmitEdit} className="flex gap-2">
+          <form onSubmit={handleSubmit} className="flex gap-2">
             <input
               type="text"
-              name="todo"
-              id="todo"
+              name="taskToBeDone"
+              id="taskToBeDone"
               placeholder="Add your task..."
-              value={input.todo}
+              value={taskToBeDone}
               onChange={handleChange}
               className="flex-1 px-3 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-400 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -99,7 +90,7 @@ export default function Home() {
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-800 transition delay-150 duration-300 hover:scale-110 hover:-translate-y-1 "
             >
-              {editId ? "Update" : "Add"}
+              Add
             </button>
           </form>
         </div>
@@ -111,11 +102,11 @@ export default function Home() {
                 key={i}
                 className="flex items-center justify-between bg-gray-900 px-3 py-2 rounded-lg hover:bg-blue-800 transition delay-0 duration-300 hover:scale-105 hover:-translate-y-1 "
               >
-                <span>{val.todo}</span>
+                <span>{val.taskToBeDone}</span>
                 <div className="flex gap-2">
                   <button
                     className="px-2 py-1 text-sm bg-yellow-500 text-black rounded hover:bg-yellow-600 transition"
-                    onClick={() => handleEdit(val)}
+                    onClick={() => router.push(`${val._id}`)}
                   >
                     Edit
                   </button>
